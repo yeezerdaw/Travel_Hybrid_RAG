@@ -1,135 +1,164 @@
-Hybrid AI Travel Assistant
-This repository contains a fully operational, debugged, and enhanced Hybrid AI Travel Assistant. The system was developed from an initial semi-functional prototype and now stands as a robust example of a Retrieval-Augmented Generation (RAG) application.
+# Hybrid AI Travel Assistant
 
-The assistant leverages a hybrid pipeline, combining semantic search from Pinecone and graph-based context from Neo4j. This enriched context is then processed by a large language model via Groq to generate intelligent, accurate, and helpful travel recommendations for Vietnam.
+## Project Overview
 
-Key Features & Deliverables
-✅ Fully Functional Scripts: pinecone_upload.py, load_to_neo4j_enhanced.py, and hybrid_chat.py are stable and run end-to-end.
-✅ Detailed Improvements Documentation: This README provides a comprehensive breakdown of all fixes, enhancements, and design choices.
-✅ Example Interaction Log: A log of a successful interaction is provided below to demonstrate system performance.
-Example Successful Interaction Log
-code
-Code
+This repository contains the source code for a Retrieval-Augmented Generation (RAG) based AI travel assistant. The system is architected to provide contextually-aware travel recommendations by integrating multiple data retrieval strategies. It leverages semantic search over a vector database and contextual lookups in a graph database to build a comprehensive context for a large language model, which then generates the final user-facing response.
 
-download
+The project demonstrates a robust, end-to-end implementation of a hybrid RAG pipeline, complete with data ingestion scripts, a core logic engine, an API layer, and a user interface.
 
-content_copy
+## System Architecture
 
-expand_less
-🌍 Your travel question: create a romantic 4 day itinerary for Vietnam
+The application follows a modular, multi-stage architecture to process user queries. The data flow is designed to enrich the initial query with relevant, multi-faceted context before the final generation step.
 
-======================================================================
-🌍 PROCESSING: create a romantic 4 day itinerary for Vietnam
-======================================================================
-INFO:__main__:🔄 Embedding generated (0.21s)
-INFO:__main__:📋 Intent extracted with avg confidence: 87.5%
-INFO:__main__:🔍 Querying Pinecone: 'create a romantic 4 day itinerary for Vietnam...'
-INFO:__main__:⚡ Cache hit (0.0001s)
-INFO:__main__:   → 8 results → 6 filtered → 5 reranked
-INFO:__main__:🕸️  Neo4j: 40 relationships (up to 2-hop)
-INFO:__main__:🤖 Generating response with Groq...
-INFO:__main__:✅ Response generated in 2.85s
-   • Vector results: 5
-   • Graph facts: 40
-   • Intent confidence: 87.5%
+1. **User Interface (index.html)**: A web-based client captures user input.
 
-======================================================================
-✨ ASSISTANT RESPONSE
-======================================================================
-Of course! Here is a romantic 4-day itinerary for Vietnam, focusing on the charm of Hanoi and the breathtaking beauty of a Halong Bay cruise. This plan balances cultural exploration with serene, unforgettable experiences.
+2. **API Server (server.py)**: A Flask-based API receives POST requests from the client.
 
-**Itinerary Overview:**
-*   **Day 1:** Hanoi's Old Quarter Charm & Culinary Delights
-*   **Day 2:** Cultural Deep Dive in Hanoi
-*   **Day 3:** Overnight Luxury Cruise in Halong Bay
-*   **Day 4:** Morning in the Bay & Return to Hanoi
+3. **Core Logic (hybrid_chat.py)**: This central module orchestrates the RAG pipeline:
+   - **Intent Extraction**: An initial LLM call parses the natural language query into a structured format.
+   - **Parallel Context Retrieval**:
+     - **Vector Search**: The query is embedded using a local Ollama model, and a semantic search is performed against a Pinecone index to retrieve relevant documents.
+     - **Graph Search**: Identifiers from the top vector search results are used to query a Neo4j graph database, fetching interconnected entities and relationships up to two hops away.
+   - **Prompt Engineering**: The retrieved vector and graph contexts are structured and combined with the user query and conversation history into a detailed prompt.
+   - **Response Generation**: The final prompt is sent to the Groq API to generate a coherent, context-aware response.
 
----
+4. **Data Layer**:
+   - **Pinecone**: A serverless vector database for storing and searching high-dimensional text embeddings.
+   - **Neo4j**: A graph database modeling the relationships between travel entities (e.g., Hotel-[NEAR]->Attraction).
 
-**Day 1: Arrival in Hanoi & Old Quarter Romance**
+```mermaid
+graph TD
+    subgraph Client
+        A[Web Frontend]
+    end
 
-*   **Morning/Afternoon:** Arrive at your hotel in Hanoi. I recommend the **Sofitel Legend Metropole Hanoi [hotel_sofitel_metropole]** for a truly luxurious and historic romantic experience. Settle in and take a leisurely stroll around Hoan Kiem Lake.
-*   **Evening:** Immerse yourselves in the vibrant energy of the **Hanoi Old Quarter [place_hanoi_old_quarter]**. For dinner, experience authentic Vietnamese cuisine at **Cha Ca Thang Long [restaurant_cha_ca_thang_long]**, which is famous for its grilled fish. It's a fantastic local spot located right in the heart of the Old Quarter.
+    subgraph Application Layer
+        B[Flask API Server]
+        C[Hybrid Chat Engine]
+    end
 
-**Day 2: Hanoi's History and Culture**
+    subgraph Service & Data Layer
+        D[Pinecone Vector Index]
+        E[Neo4j Graph Database]
+        F[Ollama Embedding Service]
+        G[Groq LLM Service]
+    end
 
-*   **Morning:** Visit the **Temple of Literature [activity_temple_of_literature]**, Vietnam's first university. Its peaceful courtyards and traditional architecture provide a serene start to the day.
-*   **Afternoon:** Explore the Ho Chi Minh Mausoleum complex and the nearby One Pillar Pagoda. Later, enjoy a traditional Water Puppet Show, a unique Vietnamese art form.
-*   **Evening:** For a special romantic dinner, book a table at **La Badiane [restaurant_la_badiane]**, known for its beautiful French-inspired fusion cuisine in a lovely courtyard setting.
+    A -- HTTP POST /ask --> B
+    B -- Invokes --> C
+    C -- Extracts Intent --> G
+    C -- Semantic Search --> D
+    C -- Embeds Query --> F
+    D -- Node IDs --> C
+    C -- Graph Context Query --> E
+    C -- Generates Response --> G
+```
 
-**Day 3: Journey to Halong Bay**
+## Key Technical Features
 
-*   **Morning:** An arranged shuttle will pick you up for the scenic drive to Halong Bay.
-*   **Afternoon:** Board your pre-booked luxury overnight cruise, such as the **Paradise Elegance Cruise Halong [hotel_paradise_elegance_cruise]**. After settling into your cabin, enjoy lunch as you sail past stunning limestone karsts.
-*   **Evening:** Participate in activities like kayaking or swimming. As the sun sets, enjoy cocktails on the sundeck followed by a gourmet dinner onboard. The quiet of the bay at night is incredibly romantic.
+- **Hybrid RAG Pipeline**: Combines dense vector retrieval with structured graph traversal to build a superior context, mitigating the limitations of each approach in isolation.
 
-**Day 4: Sunrise in the Bay & Departure**
+- **Intent Extraction with Confidence Scoring**: The system first interprets the user's query to extract structured parameters (destination, budget, etc.), allowing for more precise context retrieval.
 
-*   **Morning:** Wake up to the serene beauty of Halong Bay. You might enjoy a Tai Chi session on the deck before visiting a cave like Sung Sot (Surprise Cave). Enjoy a final brunch on the cruise as you sail back to the harbor.
-*   **Afternoon:** Your shuttle will take you back to Hanoi for your onward journey.
+- **Semantic Reranking**: Implements a post-retrieval reranking step that boosts documents based on metadata keyword matches, improving the relevance of the context provided to the LLM.
 
-This itinerary offers a perfect blend of culture, cuisine, and natural beauty, creating a memorable and romantic getaway.
-======================================================================
-⏱️  Response time: 2.85s
-⚡ Good response time
-Technical Improvements and Design Choices
-This section details the work done to transform the initial prototype into a high-performing application.
+- **Conversation Memory**: Maintains a stateful conversation history using a deque, enabling contextually relevant follow-up queries.
 
-1. Core Functionality and Bug Fixes
-Pinecone SDK v3+ Compatibility: All Pinecone client operations were updated to the modern SDK, resolving deprecation errors and ensuring stable connectivity.
-Strategic API Replacement: The initial dependency on openai was replaced with groq for LLM inference and a local ollama instance for embeddings. This shift enhances performance, reduces operational costs, and demonstrates architectural flexibility.
-Dependency Management: A requirements.txt file was created to ensure a reproducible setup.
-2. Code Design and Prompt Engineering
-Modular Architecture: The system is organized into distinct components: a config.py for settings, hybrid_chat.py for core logic, and a server.py to expose the functionality via a clean Flask API.
-Advanced Prompting:
-Intent Extraction: An initial LLM call parses the user's query into structured data (destination, style, etc.) and calculates confidence scores, leading to more targeted responses.
-Chain-of-Thought (CoT): The system prompt guides the LLM to follow a logical reasoning process (UNDERSTAND -> ANALYZE -> SYNTHESIZE -> RECOMMEND).
-Structured Context: Vector and graph results are formatted with clear Markdown, making it easier for the model to parse and cite information accurately.
-3. Enhanced Neo4j Graph Queries
-2-Hop Relationship Traversal: The Cypher query now explores relationships up to two hops away, uncovering deeper, non-obvious connections between travel entities.
-Enriched Data Payload: The query returns detailed information about connected nodes, including ratings, price ranges, and descriptions, adding valuable context.
-Intelligent Sorting: Graph results are prioritized by path depth and then by rating, ensuring the most relevant relationships are presented to the LLM.
-4. Advanced Features
-Embedding Caching: The system uses @lru_cache to cache text embeddings, minimizing latency on repeated queries and reducing redundant computations.
-Conversation Memory: A deque stores the last five conversation turns, providing the LLM with the necessary context to handle follow-up questions effectively.
-Semantic Reranking: A custom function boosts the score of vector search results whose metadata directly matches keywords in the user's query, improving the relevance of the retrieved documents.
-API and Frontend: A complete Flask server and a single-page HTML/CSS/JS frontend were developed to provide a polished, interactive user experience.
-Setup and Running Instructions
-Prerequisites:
-Python 3.8+
-Docker
-Ollama installed and running
-Clone & Install Dependencies:
-code
-Bash
+- **Local Embedding Generation**: Utilizes a local Ollama instance for text embeddings, ensuring data privacy and reducing reliance on external APIs.
 
-download
+- **Caching**: Employs an LRU cache for the embedding function to minimize latency and eliminate redundant computations on similar inputs.
 
-content_copy
+## Technology Stack
 
-expand_less
-git clone <repository_url>
+- **Backend**: Python 3.9+, Flask
+- **Frontend**: HTML5, CSS3, JavaScript (ES6)
+- **Databases**:
+  - Vector Database: Pinecone
+  - Graph Database: Neo4j
+- **AI Services**:
+  - LLM Inference: Groq API (Llama 3.1 70B model)
+  - Embedding Model: Ollama (mxbai-embed-large)
+- **Key Libraries**: pinecone-client, neo4j, groq, requests, flask
+
+## Setup and Deployment
+
+### 1. Prerequisites
+
+- Python 3.8 or higher
+- Docker and Docker Compose
+- An active Ollama instance
+- API keys for Pinecone and Groq
+
+### 2. Configuration
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/hybrid-ai-travel-assistant.git
 cd hybrid-ai-travel-assistant
+```
+
+Create and activate a Python virtual environment:
+
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
-Configure:
-Copy config.py.example to config.py.
-Fill in your API keys (PINECONE_API_KEY, GROQ_API_KEY) and set your Neo4j password.
-Launch Services:
-Neo4j: docker run --name neo4j-travel -p 7474:7474 -p 7687:7687 -d -e NEO4J_AUTH=neo4j/YOUR_NEO4J_PASSWORD neo4j:latest
-Ollama: ollama pull mxbai-embed-large (ensure the server is running with ollama serve).
-Load Data:
-code
-Bash
+```
 
-download
+Configure environment variables by copying `config.py.example` to `config.py` and populating it with the required API keys and service URIs.
 
-content_copy
+### 3. Service Initialization
 
-expand_less
+Start the Neo4j container using Docker. The password must match the one specified in `config.py`:
+
+```bash
+docker run \
+    --name neo4j-travel \
+    -p 7474:7474 -p 7687:7687 \
+    -d \
+    -e NEO4J_AUTH=neo4j/YOUR_NEO4J_PASSWORD \
+    neo4j:latest
+```
+
+Ensure the Ollama service is running and has downloaded the required model:
+
+```bash
+ollama pull mxbai-embed-large
+```
+
+### 4. Data Ingestion
+
+Execute the provided scripts to populate the databases. This is a one-time setup process:
+
+```bash
 python load_to_neo4j_enhanced.py
 python pinecone_upload.py
-Run Application:
-Start the backend: python server.py
-Open index.html in your browser.
+```
+
+### 5. Running the Application
+
+Start the Flask backend server:
+
+```bash
+python server.py
+```
+
+The API will be available at `http://127.0.0.1:5000`.
+
+Launch the user interface by opening the `index.html` file in a web browser.
+
+## Future Development
+
+- **Docker Compose Orchestration**: Encapsulate all services (Neo4j, Flask app) in a `docker-compose.yml` for simplified, one-command deployment.
+
+- **Real-time Data Integration**: Augment the existing dataset with real-time APIs for hotel availability, flight pricing, and weather forecasts.
+
+- **User Authentication**: Implement user accounts to persist conversation history and personal travel preferences across sessions.
+
+- **Scalability Enhancements**: Transition the Flask development server to a production-grade WSGI server like Gunicorn or uWSGI behind a reverse proxy like Nginx.
