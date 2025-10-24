@@ -8,8 +8,6 @@
 
 This repository contains the source code for a Retrieval-Augmented Generation (RAG) based AI travel assistant. The system is architected to provide contextually-aware travel recommendations by integrating multiple data retrieval strategies. It leverages semantic search over a vector database and contextual lookups in a graph database to build a comprehensive context for a large language model, which then generates the final user-facing response.
 
-The project demonstrates a robust, end-to-end implementation of a hybrid RAG pipeline, complete with data ingestion scripts, a core logic engine, an API layer, and a user interface.
-
 ## System Architecture
 
 The application follows a modular, multi-stage architecture to process user queries. The data flow is designed to enrich the initial query with relevant, multi-faceted context before the final generation step.
