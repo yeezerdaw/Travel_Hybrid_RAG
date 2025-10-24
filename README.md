@@ -1,5 +1,8 @@
 # Hybrid AI Travel Assistant
 
+<img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
+
+
 ## Project Overview
 
 This repository contains the source code for a Retrieval-Augmented Generation (RAG) based AI travel assistant. The system is architected to provide contextually-aware travel recommendations by integrating multiple data retrieval strategies. It leverages semantic search over a vector database and contextual lookups in a graph database to build a comprehensive context for a large language model, which then generates the final user-facing response.
@@ -53,8 +56,6 @@ graph TD
     C -- Graph Context Query --> E
     C -- Generates Response --> G
 ```
-
-<img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
 
 ## Key Technical Features
 
