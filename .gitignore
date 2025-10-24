@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+venv/
+*.pyc
+
+# Local config file - DO NOT COMMIT
+config.py
+
+# Mac
+.DS_Store
