@@ -1,7 +1,8 @@
 # Hybrid AI Travel Assistant
 
-<img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
-
+<p align="center">
+  <img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
+</p>
 
 ## Project Overview
 
