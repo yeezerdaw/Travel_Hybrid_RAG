@@ -54,7 +54,7 @@ graph TD
     C -- Generates Response --> G
 ```
 
-<img src="./images/pinecone-index.png" alt="Pinecone Index" width="600">
+<img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
 
 ## Key Technical Features
 
