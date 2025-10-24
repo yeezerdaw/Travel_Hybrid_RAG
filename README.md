@@ -34,6 +34,10 @@ The application follows a modular, multi-stage architecture to process user quer
   <img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
 </p>
 
+<p align="center">
+  <img src="pine.png" alt="Index" width="600">
+</p>
+
 ```mermaid
 graph TD
     subgraph Client
