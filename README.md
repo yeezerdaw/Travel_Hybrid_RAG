@@ -29,10 +29,6 @@ The application follows a modular, multi-stage architecture to process user quer
 4. **Data Layer**:
    - **Pinecone**: A serverless vector database for storing and searching high-dimensional text embeddings.
    - **Neo4j**: A graph database modeling the relationships between travel entities (e.g., Hotel-[NEAR]->Attraction).
-  
-  <p align="center">
-  <img src="Screenshot 2025-10-24 at 10.35.34 PM.png" alt="Index" width="600">
-</p>
 
 <p align="center">
   <img src="pine.png" alt="Index" width="600">
