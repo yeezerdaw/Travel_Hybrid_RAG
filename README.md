@@ -54,6 +54,8 @@ graph TD
     C -- Generates Response --> G
 ```
 
+<img src="./images/pinecone-index.png" alt="Pinecone Index" width="600">
+
 ## Key Technical Features
 
 - **Hybrid RAG Pipeline**: Combines dense vector retrieval with structured graph traversal to build a superior context, mitigating the limitations of each approach in isolation.
